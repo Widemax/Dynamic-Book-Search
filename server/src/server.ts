@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(process.cwd(), 'client', 'dist');
+  const clientBuildPath = path.join(process.cwd(), '..', 'client', 'dist');
   app.use(express.static(clientBuildPath));
 
   app.get('*', (_req: Request, res: Response) => {
