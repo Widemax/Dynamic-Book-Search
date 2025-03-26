@@ -1,4 +1,4 @@
-import express, { Application, Request } from 'express';
+import express, { Application, Request, Response } from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { ApolloServer } from 'apollo-server-express';
@@ -17,14 +17,20 @@ const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve static assets in production
+// Serve static assets in production from the client/dist folder
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  // Fallback route: serve index.html for any route not handled by your API
+  app.get('*', (_req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
 }
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  persistedQueries: false, 
   context: ({ req }: { req: Request }) => {
     const authHeader = req.headers.authorization;
     let user;
