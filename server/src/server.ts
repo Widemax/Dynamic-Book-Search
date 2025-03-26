@@ -1,6 +1,5 @@
 import express, { Application, Request, Response } from 'express';
 import path from 'node:path';
-import { fileURLToPath } from 'url';
 import { ApolloServer } from 'apollo-server-express';
 import db from './config/connection.js';
 import { typeDefs, resolvers } from './schemas/index.js';
@@ -8,22 +7,18 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve static assets in production from the client/dist folder
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+  const clientBuildPath = path.join(process.cwd(), 'client', 'dist');
+  app.use(express.static(clientBuildPath));
 
-  // Fallback route: serve index.html for any route not handled by your API
   app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
 
