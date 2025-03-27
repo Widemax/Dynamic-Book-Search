@@ -14,16 +14,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'production') {
-  // Since the Render project root is the server folder,
-  // the client folder is one level up.
-  const clientBuildPath = path.join(process.cwd(), '..', 'client', 'dist');
+  // With Render's root set to the repository root,
+  // the client build is at <repo-root>/client/dist.
+  const clientBuildPath = path.join(process.cwd(), 'client', 'dist');
   console.log("Serving static files from:", clientBuildPath);
   
   app.use(express.static(clientBuildPath));
 
-  // Fallback route: serve index.html for any route not handled by static middleware.
+  // Fallback route: serve index.html for any route not handled by the static middleware.
   app.get('*', (req: Request, res: Response): void => {
-    // If the URL contains a dot, it's likely an asset.
     if (req.originalUrl.includes('.')) {
       res.status(404).send('Not found');
       return;
