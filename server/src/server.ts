@@ -14,10 +14,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'production') {
+  // Since the Render project root is the server folder,
+  // the client folder is one level up.
   const clientBuildPath = path.join(process.cwd(), '..', 'client', 'dist');
+  console.log("Serving static files from:", clientBuildPath);
+  
   app.use(express.static(clientBuildPath));
 
-  app.get('*', (_req: Request, res: Response) => {
+  // Fallback route: serve index.html for any route not handled by static middleware.
+  app.get('*', (req: Request, res: Response): void => {
+    // If the URL contains a dot, it's likely an asset.
+    if (req.originalUrl.includes('.')) {
+      res.status(404).send('Not found');
+      return;
+    }
     res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
@@ -25,7 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  persistedQueries: false, 
+  persistedQueries: false, // disable persisted queries warning
   context: ({ req }: { req: Request }) => {
     const authHeader = req.headers.authorization;
     let user;
@@ -34,7 +44,7 @@ const server = new ApolloServer({
       try {
         user = jwt.verify(token, process.env.JWT_SECRET_KEY || '');
       } catch (e) {
-        console.error(e);
+        console.error("JWT verification error:", e);
       }
     }
     return { user };
