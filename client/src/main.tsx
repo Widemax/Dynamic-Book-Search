@@ -9,8 +9,10 @@ import App from './App';
 import SearchBooks from './pages/SearchBooks';
 import SavedBooks from './pages/SavedBooks';
 
+// Use Vite's MODE variable to choose the endpoint.
+// When deployed (MODE === 'production'), use a relative URL so that the client makes requests to the same domain.
 const httpLink = createHttpLink({
-  uri: 'http://localhost:3001/graphql'  // Updated to target the back-end GraphQL endpoint
+  uri: import.meta.env.MODE === 'production' ? '/graphql' : 'http://localhost:3001/graphql'
 });
 
 const authLink = setContext((_, { headers }) => {
